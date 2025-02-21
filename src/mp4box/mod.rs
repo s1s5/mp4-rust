@@ -149,6 +149,8 @@ pub use udta::UdtaBox;
 pub use vmhd::VmhdBox;
 pub use vp09::Vp09Box;
 pub use vpcc::VpccBox;
+pub use stsc::StscEntry;
+pub use stts::SttsEntry;
 
 pub const HEADER_SIZE: u64 = 8;
 // const HEADER_LARGE_SIZE: u64 = 16;
