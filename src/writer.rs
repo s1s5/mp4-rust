@@ -85,11 +85,11 @@ impl<W: Write + Seek> Mp4Writer<W> {
         })
     }
 
-    pub fn add_track(&mut self, config: &TrackConfig) -> Result<()> {
+    pub fn add_track(&mut self, config: &TrackConfig) -> Result<u32> {
         let track_id = self.tracks.len() as u32 + 1;
         let track = Mp4TrackWriter::new(track_id, config)?;
         self.tracks.push(track);
-        Ok(())
+        Ok(track_id)
     }
 
     fn update_durations(&mut self, track_dur: u64) {
@@ -131,7 +131,15 @@ impl<W: Write + Seek> Mp4Writer<W> {
     }
 
     pub fn write_end(&mut self) -> Result<()> {
-        let mut moov = MoovBox::default();
+        self.write_end_with_moov(None)
+    }
+
+    pub fn write_end_with_moov(&mut self, default_moov: Option<MoovBox>) -> Result<()> {
+        let mut moov = if let Some(moov) = default_moov {
+            moov
+        } else {
+            MoovBox::default()
+        };
 
         for track in self.tracks.iter_mut() {
             moov.traks.push(track.write_end(&mut self.writer)?);
