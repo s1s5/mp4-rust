@@ -7,7 +7,7 @@ use crate::mp4box::*;
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Default)]
 pub struct TfhdBox {
     pub version: u8,
-    pub flags: u32,
+    // pub flags: u32,
     pub track_id: u32,
     pub base_data_offset: Option<u64>,
     pub sample_description_index: Option<u32>,
@@ -29,21 +29,46 @@ impl TfhdBox {
         BoxType::TfhdBox
     }
 
+    pub fn flags(&self) -> u32 {
+        (if self.base_data_offset.is_some() {
+            TfhdBox::FLAG_BASE_DATA_OFFSET
+        } else {
+            0
+        }) | if self.sample_description_index.is_some() {
+            TfhdBox::FLAG_SAMPLE_DESCRIPTION_INDEX
+        } else {
+            0
+        } | if self.default_sample_duration.is_some() {
+            TfhdBox::FLAG_DEFAULT_SAMPLE_DURATION
+        } else {
+            0
+        } | if self.default_sample_size.is_some() {
+            TfhdBox::FLAG_DEFAULT_SAMPLE_SIZE
+        } else {
+            0
+        } | if self.default_sample_flags.is_some() {
+            TfhdBox::FLAG_DEFAULT_SAMPLE_FLAGS
+        } else {
+            0
+        }
+    }
+
     pub fn get_size(&self) -> u64 {
         let mut sum = HEADER_SIZE + HEADER_EXT_SIZE + 4;
-        if TfhdBox::FLAG_BASE_DATA_OFFSET & self.flags > 0 {
+        let flags = self.flags();
+        if TfhdBox::FLAG_BASE_DATA_OFFSET & flags > 0 {
             sum += 8;
         }
-        if TfhdBox::FLAG_SAMPLE_DESCRIPTION_INDEX & self.flags > 0 {
+        if TfhdBox::FLAG_SAMPLE_DESCRIPTION_INDEX & flags > 0 {
             sum += 4;
         }
-        if TfhdBox::FLAG_DEFAULT_SAMPLE_DURATION & self.flags > 0 {
+        if TfhdBox::FLAG_DEFAULT_SAMPLE_DURATION & flags > 0 {
             sum += 4;
         }
-        if TfhdBox::FLAG_DEFAULT_SAMPLE_SIZE & self.flags > 0 {
+        if TfhdBox::FLAG_DEFAULT_SAMPLE_SIZE & flags > 0 {
             sum += 4;
         }
-        if TfhdBox::FLAG_DEFAULT_SAMPLE_FLAGS & self.flags > 0 {
+        if TfhdBox::FLAG_DEFAULT_SAMPLE_FLAGS & flags > 0 {
             sum += 4;
         }
         sum
@@ -105,7 +130,6 @@ impl<R: Read + Seek> ReadBox<&mut R> for TfhdBox {
 
         Ok(TfhdBox {
             version,
-            flags,
             track_id,
             base_data_offset,
             sample_description_index,
@@ -121,7 +145,7 @@ impl<W: Write> WriteBox<&mut W> for TfhdBox {
         let size = self.box_size();
         BoxHeader::new(self.box_type(), size).write(writer)?;
 
-        write_box_header_ext(writer, self.version, self.flags)?;
+        write_box_header_ext(writer, self.version, self.flags())?;
         writer.write_u32::<BigEndian>(self.track_id)?;
         if let Some(base_data_offset) = self.base_data_offset {
             writer.write_u64::<BigEndian>(base_data_offset)?;
@@ -153,7 +177,6 @@ mod tests {
     fn test_tfhd() {
         let src_box = TfhdBox {
             version: 0,
-            flags: 0,
             track_id: 1,
             base_data_offset: None,
             sample_description_index: None,
@@ -178,9 +201,9 @@ mod tests {
     fn test_tfhd_with_flags() {
         let src_box = TfhdBox {
             version: 0,
-            flags: TfhdBox::FLAG_SAMPLE_DESCRIPTION_INDEX
-                | TfhdBox::FLAG_DEFAULT_SAMPLE_DURATION
-                | TfhdBox::FLAG_DEFAULT_SAMPLE_FLAGS,
+            // flags: TfhdBox::FLAG_SAMPLE_DESCRIPTION_INDEX
+            //     | TfhdBox::FLAG_DEFAULT_SAMPLE_DURATION
+            //     | TfhdBox::FLAG_DEFAULT_SAMPLE_FLAGS,
             track_id: 1,
             base_data_offset: None,
             sample_description_index: Some(1),
