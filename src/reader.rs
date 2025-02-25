@@ -100,7 +100,9 @@ impl<R: Read + Seek> Mp4Reader<R> {
             let mut default_sample_duration = 0;
             if let Some(ref moov) = moov {
                 if let Some(ref mvex) = &moov.mvex {
-                    default_sample_duration = mvex.trex.default_sample_duration
+                    if !mvex.trex.is_empty() {
+                        default_sample_duration = mvex.trex[0].default_sample_duration
+                    }
                 }
             }
 
@@ -188,7 +190,9 @@ impl<R: Read + Seek> Mp4Reader<R> {
 
         let mut default_sample_duration = 0;
         if let Some(ref mvex) = &self.moov.mvex {
-            default_sample_duration = mvex.trex.default_sample_duration
+            if !mvex.trex.is_empty() {
+                default_sample_duration = mvex.trex[0].default_sample_duration
+            }
         }
 
         for (moof, moof_offset) in moofs.iter().zip(moof_offsets) {
