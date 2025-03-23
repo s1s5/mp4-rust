@@ -85,6 +85,7 @@ pub(crate) mod moov;
 pub(crate) mod mp4a;
 pub(crate) mod mvex;
 pub(crate) mod mvhd;
+pub(crate) mod sidx;
 pub(crate) mod smhd;
 pub(crate) mod stbl;
 pub(crate) mod stco;
@@ -93,6 +94,7 @@ pub(crate) mod stsd;
 pub(crate) mod stss;
 pub(crate) mod stsz;
 pub(crate) mod stts;
+pub(crate) mod styp;
 pub(crate) mod tfdt;
 pub(crate) mod tfhd;
 pub(crate) mod tkhd;
@@ -129,14 +131,19 @@ pub use moov::MoovBox;
 pub use mp4a::Mp4aBox;
 pub use mvex::MvexBox;
 pub use mvhd::MvhdBox;
+pub use sidx::SidxBox;
+pub use sidx::SidxReference;
 pub use smhd::SmhdBox;
 pub use stbl::StblBox;
 pub use stco::StcoBox;
 pub use stsc::StscBox;
+pub use stsc::StscEntry;
 pub use stsd::StsdBox;
 pub use stss::StssBox;
 pub use stsz::StszBox;
 pub use stts::SttsBox;
+pub use stts::SttsEntry;
+pub use styp::StypBox;
 pub use tfdt::TfdtBox;
 pub use tfhd::TfhdBox;
 pub use tkhd::TkhdBox;
@@ -149,8 +156,6 @@ pub use udta::UdtaBox;
 pub use vmhd::VmhdBox;
 pub use vp09::Vp09Box;
 pub use vpcc::VpccBox;
-pub use stsc::StscEntry;
-pub use stts::SttsEntry;
 
 pub const HEADER_SIZE: u64 = 8;
 // const HEADER_LARGE_SIZE: u64 = 16;
@@ -240,7 +245,9 @@ boxtype! {
     CovrBox => 0x636f7672,
     DescBox => 0x64657363,
     WideBox => 0x77696465,
-    WaveBox => 0x77617665
+    WaveBox => 0x77617665,
+    StypBox => 0x73747970,
+    SidxBox => 0x73696478
 }
 
 pub trait Mp4Box: Sized {
